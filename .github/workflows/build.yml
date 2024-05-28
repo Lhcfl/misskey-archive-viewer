@@ -14,7 +14,7 @@ jobs:
         with:
           node-version: 20
       - run: yarn install
-      - run: yarn build
+      - run: yarn build-only
 
       - name: Configure Git # 配置Git
         env:
@@ -40,7 +40,7 @@ jobs:
           git add -A
           git commit -m "built"
 
-      - name: Push blog # 推送
+      - name: Push
         run: |
           cd dist
           git branch -M main
