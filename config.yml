@@ -1,3 +1,3 @@
 $schema: './config.schema.json'
 
-base_url: '/'
+base_url: /misskey-archive-viewer-web/
