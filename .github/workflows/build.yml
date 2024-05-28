@@ -1,0 +1,47 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_blog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+      - run: yarn install
+      - run: yarn build
+
+      - name: Configure Git # 配置Git
+        env:
+          DEPLOY_PRI: ${{ secrets.DEPLOY_PRI }}
+          GIT_USERNAME: ${{ github.repository_owner }}
+          GIT_EMAIL: ${{ github.repository_owner }}@user.github.com
+        run: |
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          mkdir -p ~/.ssh/
+          echo "$DEPLOY_PRI" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.name $GIT_USERNAME
+          git config --global user.email $GIT_EMAIL
+
+      - name: Commit dist
+        env:
+          GIT_URL: 'git@github.com:Lhcfl/misskey-archive-viewer-web'
+        run: |
+          cd dist
+          git init
+          git remote add origin $GIT_URL
+          git add -A
+          git commit -m "built"
+
+      - name: Push blog # 推送
+        run: |
+          cd dist
+          git branch -M main
+          git push origin HEAD:main --force
